@@ -1,0 +1,74 @@
+version: '3.9'
+
+services:
+  tg_bot:
+    build:
+      context: .
+      dockerfile: docker/tg_bot/Dockerfile
+    container_name: tg_bot
+    volumes:
+      - ./logs/:/app/logs/ # logs file
+    env_file:
+      - .env
+    ports:
+      - "3030:3030"
+    restart: always
+    networks:
+      - gocardify_net
+    depends_on:
+      - rabbitmq
+
+  anki_bot:
+    build:
+      context: .
+      dockerfile: docker/anki_bot/Dockerfile
+    container_name: anki_bot
+    volumes:
+      - ./logs/:/app/logs/ # logs file
+    env_file:
+      - .env
+    ports:
+      - "7070:7070"
+    restart: always
+    networks:
+      - gocardify_net
+    depends_on:
+      - selenium
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:latest
+    hostname: rabbitmq
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - gocardify_net
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  selenium:
+    container_name: selenium
+    networks:
+      - gocardify_net
+    shm_size: 2gb
+    #    image: selenium/standalone-chrome:4.8.1-20230221
+    #    for MacOs
+    image: seleniarm/standalone-chromium:latest
+    healthcheck:
+      test: [ "CMD", "curl", "GET", "http://localhost:4444/status" ]
+      interval: 5s
+      timeout: 20s
+      retries: 100
+    ports:
+      - "4444:4444"
+
+
+networks:
+  gocardify_net:
+    name: gocardify_net

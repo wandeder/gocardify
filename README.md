@@ -19,7 +19,7 @@ gocardify is a simple Go program designed to facilitate the transfer of messages
 
 ## Usage
 
-1. Set up your Telegram bot and RabbitMQ server, sign up AkkiWeb.
+1. Set up your Telegram bot and RabbitMQ server, sign up AnkiWeb.
 2. Configure the program with your Telegram bot token and AnkiWeb credentials in the .env file.
 3. Run the program: `./gocardify`.
 4. Add your Telegram bot into chat and start to sent messages.
