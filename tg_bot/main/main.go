@@ -85,10 +85,10 @@ func main() {
 					if err != nil {
 						logger.Println("Failed to send message in Telegram:", err)
 					}
-				}
-
-				if err := tg_bot.SendToQueue(ch, queue.Name, msg); err != nil {
-					logger.Println("Failed to send message to RabbitMQ:", err)
+				} else {
+					if err := tg_bot.SendToQueue(ch, queue.Name, msg); err != nil {
+						logger.Println("Failed to send message to RabbitMQ:", err)
+					}
 				}
 			}
 		case <-stop:

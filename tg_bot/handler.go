@@ -6,7 +6,7 @@ import (
 )
 
 func ReadMsg(msg string) (string, error) {
-	re := regexp.MustCompile(`front:\s*(\S+)\s*back:\s*(\S+)\.`)
+	re := regexp.MustCompile(`(?i)front:\s*(.+?)\s*back:\s*(.+)`)
 
 	matches := re.FindStringSubmatch(msg)
 
