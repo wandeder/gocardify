@@ -22,3 +22,7 @@ go.work
 
 # Env-file
 .env
+
+# Log files
+log/
+logs/

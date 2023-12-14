@@ -2,9 +2,10 @@ version: '3.9'
 
 services:
   tg_bot:
+    platform: linux/amd64
     build:
       context: .
-      dockerfile: docker/tg_bot/Dockerfile
+      dockerfile: ./docker/tg_bot/Dockerfile
     container_name: tg_bot
     volumes:
       - ./logs/:/app/logs/ # logs file
@@ -19,9 +20,10 @@ services:
       - rabbitmq
 
   anki_bot:
+    platform: linux/amd64
     build:
       context: .
-      dockerfile: docker/anki_bot/Dockerfile
+      dockerfile: ./docker/anki_bot/Dockerfile
     container_name: anki_bot
     volumes:
       - ./logs/:/app/logs/ # logs file
@@ -40,12 +42,13 @@ services:
     image: rabbitmq:latest
     hostname: rabbitmq
     restart: always
-    env_file:
-      - .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
     networks:
       - gocardify_net
     ports:
-      - "15672:15672"
+      - "5672:5672"
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
       interval: 30s
