@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 
 	file, err := os.OpenFile(logFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
-		logger.Println(err, "Failed opening or creating logs file")
+		logger.Println("Failed opening or creating logs file:", err)
 	}
 	defer file.Close()
 	logger.SetOutput(file)
@@ -44,28 +45,30 @@ func main() {
 		os.Getenv("RABBITMQ_HOST"),
 		os.Getenv("RABBITMQ_PORT"),
 	)
-	rabbitMq, err := amqp.Dial(rabbitUrl)
+	rabbitMq, err := amqp.DialConfig(rabbitUrl, amqp.Config{
+		Heartbeat: 10 * time.Second,
+	})
 	if err != nil {
-		logger.Println(err)
+		logger.Println("Connection RabbitMQ error:", err)
 	}
 	defer rabbitMq.Close()
 
 	ch, err := rabbitMq.Channel()
 	if err != nil {
-		logger.Println(err)
+		logger.Println("Channel RabbitMQ error:", err)
 	}
 	defer ch.Close()
 
 	queue, err := ch.QueueDeclare(
 		os.Getenv("QUEUE_NAME"),
-		false,
+		true,
 		false,
 		false,
 		false,
 		nil,
 	)
 	if err != nil {
-		logger.Println(err)
+		logger.Println("Error in queue declare:", err)
 	}
 
 	for {
@@ -86,8 +89,11 @@ func main() {
 						logger.Println("Failed to send message in Telegram:", err)
 					}
 				} else {
-					if err := tg_bot.SendToQueue(ch, queue.Name, msg); err != nil {
+					err := tg_bot.SendToQueue(ch, queue.Name, msg)
+					if err != nil {
 						logger.Println("Failed to send message to RabbitMQ:", err)
+					} else {
+						logger.Println("Succeed sending message to RabbitMQ.")
 					}
 				}
 			}

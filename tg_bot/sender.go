@@ -12,8 +12,8 @@ func SendToQueue(ch *amqp.Channel, queueName string, msg string) error {
 
 	err := ch.PublishWithContext(
 		ctx,
+		"",
 		queueName,
-		"msg",
 		false,
 		false,
 		amqp.Publishing{
